@@ -5,30 +5,30 @@ let infoColumnCount = 5
 // NORMAL mode:
 //   - Smallest subnet: /32
 //   - Two reserved addresses per subnet of size <= 30:
-//     - Network Address (network + 0)
-//     - Broadcast Address (last network address)
-// AWS mode :
+//     - Net+0 = Network Address
+//     - Last = Broadcast Address
+// AWS mode:
 //   - Smallest subnet: /28
 //   - Two reserved addresses per subnet:
-//     - Network Address (network + 0)
-//     - AWS Reserved - VPC Router
-//     - AWS Reserved - VPC DNS
-//     - AWS Reserved - Future Use
-//     - Broadcast Address (last network address)
-// Azure mode :
+//     - Net+0 = Network Address
+//     - Net+1 = AWS Reserved - VPC Router
+//     - Net+2 = AWS Reserved - VPC DNS
+//     - Net+3 = AWS Reserved - Future Use
+//     - Last = Broadcast Address
+// Azure mode:
 //   - Smallest subnet: /29
 //   - Two reserved addresses per subnet:
-//     - Network Address (network + 0)
-//     - Azure Reserved - Default Gateway
-//     - Azure Reserved - DNS Mapping
-//     - Azure Reserved - DNS Mapping
-//     - Broadcast Address (last network address)
+//     - Net+0 = Network Address
+//     - Net+1 = Reserved - Default Gateway
+//     - Net+2 = Reserved - DNS Mapping
+//     - Net+3 = Reserved - DNS Mapping
+//     - Last = Broadcast Address
 let noteTimeout;
 let minSubnetSize = 32
-let operatingMode = $("input[type=radio][name=operatingMode]:checked" ).val();
+let operatingMode = getOperatingMode();
 let inflightColor = 'NONE'
-let urlVersion = '2'
-let configVersion = '2'
+let urlVersion = '1'
+let configVersion = '1'
 
 $('input#network,input#netsize').on('input', function() {
     $('#input_form')[0].classList.add('was-validated');
@@ -87,8 +87,10 @@ $('#btn_import_export').on('click', function() {
 })
 
 function reset() {
-    operatingMode = $("input[type=radio][name=operatingMode]:checked" ).val();
-    if (operatingMode === 'AWS') {
+    operatingMode = getOperatingMode();
+    if (operatingMode === 'NORMAL') {
+        minSubnetSize = 32
+    } else if (operatingMode === 'AWS') {
         minSubnetSize = 28
     } else if (operatingMode === 'AZURE') {
         minSubnetSize = 29
@@ -129,6 +131,9 @@ $('#calcbody').on('focusout', 'td.note input', function(event) {
     mutate_subnet_map('note', this.dataset.subnet, '', this.value)
 })
 
+function getOperatingMode() {
+    return 'NORMAL';
+}
 
 function renderTable(operatingMode) {
     // TODO: Validation Code
